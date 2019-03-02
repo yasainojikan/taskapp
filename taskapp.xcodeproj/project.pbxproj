@@ -14,6 +14,7 @@
 		FA18A113222A48DF00DF1257 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA18A112222A48DF00DF1257 /* Assets.xcassets */; };
 		FA18A116222A48DF00DF1257 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA18A114222A48DF00DF1257 /* LaunchScreen.storyboard */; };
 		FA18A11E222A54AB00DF1257 /* inputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA18A11D222A54AB00DF1257 /* inputViewController.swift */; };
+		FA18A120222A638400DF1257 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA18A11F222A638400DF1257 /* Task.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		FA18A115222A48DF00DF1257 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FA18A117222A48DF00DF1257 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FA18A11D222A54AB00DF1257 /* inputViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = inputViewController.swift; sourceTree = "<group>"; };
+		FA18A11F222A638400DF1257 /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,7 +50,6 @@
 				58772B686762F5FE78B1FDFA /* Pods-taskapp.debug.xcconfig */,
 				205A77EA4FF873F76DF935B9 /* Pods-taskapp.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -88,6 +89,7 @@
 				FA18A114222A48DF00DF1257 /* LaunchScreen.storyboard */,
 				FA18A117222A48DF00DF1257 /* Info.plist */,
 				FA18A11D222A54AB00DF1257 /* inputViewController.swift */,
+				FA18A11F222A638400DF1257 /* Task.swift */,
 			);
 			path = taskapp;
 			sourceTree = "<group>";
@@ -214,6 +216,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA18A120222A638400DF1257 /* Task.swift in Sources */,
 				FA18A10E222A48DE00DF1257 /* ViewController.swift in Sources */,
 				FA18A10C222A48DE00DF1257 /* AppDelegate.swift in Sources */,
 				FA18A11E222A54AB00DF1257 /* inputViewController.swift in Sources */,
