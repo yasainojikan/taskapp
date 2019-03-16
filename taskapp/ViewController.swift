@@ -14,7 +14,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     @IBOutlet weak var tableView: UITableView!
     
-    let realm = try! Realm()
+    //  データが入った状態でプロパティ追加すると、migrationされる仕様
+    let realm = try! Realm(configuration: Realm.Configuration(deleteRealmIfMigrationNeeded: true))
     
     var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: false)
     
@@ -43,7 +44,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         return cell
     }
-
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "cellSegue", sender: nil)
     }
@@ -51,7 +52,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle{
         return .delete
     }
-
+    
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
         if editingStyle == .delete {
@@ -64,7 +65,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             try! realm.write {
                 self.realm.delete(self.taskArray[indexPath.row])
                 tableView.deleteRows(at: [indexPath], with: .fade)
-             }
+            }
             
             center.getPendingNotificationRequests { (requests: [UNNotificationRequest]) in
                 for request in requests {
@@ -76,6 +77,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
+    //    セルをタップした時に、inputViewControllerへ移動する。+は新規作成画面に。
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let inputViewController: inputViewController = segue.destination as! inputViewController
         
@@ -101,6 +103,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         tableView.reloadData()
     }
     
+//    カテゴリでソートする。まずはfilterで検索バーに打ち込んだ文字で絞り込む。
+    var filteredCategory = try! Realm().objects(Task.self).filter("category CONTAINS ''")
+//    これでフィルタリングしたRealmのインスタンスを取得できたので、これを検索バーをタップした時に実装する
     
 }
 
