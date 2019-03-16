@@ -15,6 +15,7 @@ class inputViewController: UIViewController {
     @IBOutlet weak var titleTextField: UITextField!
     @IBOutlet weak var contentsTextView: UITextView!
     @IBOutlet weak var datePicker: UIDatePicker!
+    @IBOutlet weak var categoryTextField: UITextField!
     
     let realm = try! Realm()
     var task: Task!
@@ -39,7 +40,7 @@ class inputViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         
-        //viewが非常時になった時、データベースにUI表示されているものを保存する
+        //viewが非表示になった時、データベースにUI表示されているものを保存する
         try! realm.write {
             self.task.title = self.titleTextField.text!
             self.task.contents = self.contentsTextView.text
