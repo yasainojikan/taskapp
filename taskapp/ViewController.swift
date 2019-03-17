@@ -10,38 +10,82 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
     
     @IBOutlet weak var tableView: UITableView!
     
     //  データが入った状態でプロパティ追加すると、migrationされる仕様
     let realm = try! Realm(configuration: Realm.Configuration(deleteRealmIfMigrationNeeded: true))
     
+    var searchController = UISearchController()
     var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: false)
+    var filteredCategory = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         tableView.delegate = self
         tableView.dataSource = self
+        
+        searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.sizeToFit()
+        searchController.dimsBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
+        
+        tableView.tableHeaderView = searchController.searchBar
+    }
+    
+    //    画面遷移のメソッド
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let inputViewController: inputViewController = segue.destination as! inputViewController
+        //       セルなら詳細画面へ。+は新規作成画面へ。
+        if segue.identifier == "cellSegue" {
+            let indexPath = self.tableView.indexPathForSelectedRow
+            inputViewController.task = taskArray[indexPath!.row]
+        } else {
+            let task = Task()
+            task.date = Date()
+            
+            let allTasks = realm.objects(Task.self)
+            if allTasks.count != 0 {
+                task.id = allTasks.max(ofProperty: "id")! + 1
+            }
+            inputViewController.task = task
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        tableView.reloadData()
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return taskArray.count
+        if searchController.isActive {
+            return filteredCategory.count
+        }else {
+            return taskArray.count
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        
         let task = taskArray[indexPath.row]
-        cell.textLabel?.text = task.title
-        
+        let filteredTask = filteredCategory[indexPath.row]
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
         
         let dateString: String = formatter.string(from: task.date)
         cell.detailTextLabel?.text = dateString
         
+        if searchController.isActive {
+            // もしサーチコントローラーが動いているなら、検索Taskを並べる
+            cell.textLabel?.text = filteredTask.title
+        } else {
+            cell.textLabel?.text = task.title
+        }        
         return cell
     }
     
@@ -77,35 +121,17 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    //    セルをタップした時に、inputViewControllerへ移動する。+は新規作成画面に。
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let inputViewController: inputViewController = segue.destination as! inputViewController
+    //    文字が入力されるたびに呼ばれる
+    func updateSearchResults(for searchController: UISearchController) {
+        //    searchBarに打ち込まれた文字を変数として定義し、それで検索をかける
+        let searchCategory = searchController.searchBar.text!
+        filteredCategory = try! Realm().objects(Task.self).filter("category == %@", searchCategory)
         
-        if segue.identifier == "cellSegue" {
-            let indexPath = self.tableView.indexPathForSelectedRow
-            inputViewController.task = taskArray[indexPath!.row]
-        } else {
-            let task = Task()
-            task.date = Date()
-            
-            let allTasks = realm.objects(Task.self)
-            if allTasks.count != 0 {
-                task.id = allTasks.max(ofProperty: "id")! + 1
-            }
-            
-            inputViewController.task = task
-        }
-        
+        self.tableView.reloadData()
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        tableView.reloadData()
-    }
-    
-//    カテゴリでソートする。まずはfilterで検索バーに打ち込んだ文字で絞り込む。
-    var filteredCategory = try! Realm().objects(Task.self).filter("category CONTAINS ''")
-//    これでフィルタリングしたRealmのインスタンスを取得できたので、これを検索バーをタップした時に実装する
-    
 }
+//    バーに打ち込まれた文字を変数として定義する
+
+
+
 
