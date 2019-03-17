@@ -17,6 +17,8 @@ class inputViewController: UIViewController {
     @IBOutlet weak var datePicker: UIDatePicker!
     @IBOutlet weak var categoryTextField: UITextField!
     
+//    var searchController = UISearchController()
+    
     let realm = try! Realm()
     var task: Task!
         
@@ -33,6 +35,8 @@ class inputViewController: UIViewController {
         contentsTextView.text = task.contents
         datePicker.date = task.date
         categoryTextField.text = task.category
+        
+//        self.searchController.isActive = false
     }
     
     @objc func dismissKeyboard() {

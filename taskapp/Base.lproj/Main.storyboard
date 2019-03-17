@@ -61,6 +61,7 @@
                     <navigationItem key="navigationItem" id="NHX-Xg-beu">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="Mba-2n-RU7">
                             <connections>
+                                <action selector="Add:" destination="BYZ-38-t0r" id="O2a-6b-NGO"/>
                                 <segue destination="6eY-R9-z70" kind="show" id="seX-1k-o2F"/>
                             </connections>
                         </barButtonItem>

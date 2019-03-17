@@ -40,6 +40,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     //    画面遷移のメソッド
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
         let inputViewController: inputViewController = segue.destination as! inputViewController
         //       セルなら詳細画面へ。+は新規作成画面へ。
         if segue.identifier == "cellSegue" {
@@ -91,6 +92,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "cellSegue", sender: nil)
+        searchController.isActive = false
     }
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle{
@@ -125,13 +127,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func updateSearchResults(for searchController: UISearchController) {
         //    searchBarに打ち込まれた文字を変数として定義し、それで検索をかける
         let searchCategory = searchController.searchBar.text!
-        filteredCategory = try! Realm().objects(Task.self).filter("category == %@", searchCategory)
+        filteredCategory = try! Realm().objects(Task.self).filter("category CONTAINS %@", searchCategory)
         
         self.tableView.reloadData()
     }
 }
-//    バーに打ち込まれた文字を変数として定義する
-
-
-
-
