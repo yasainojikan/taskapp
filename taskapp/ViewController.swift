@@ -13,6 +13,9 @@ import UserNotifications
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
     
     @IBOutlet weak var tableView: UITableView!
+   /* @IBAction func Add(_ sender: Any) {
+        self.searchController.dismiss(animated: true, completion: {self.navigationController?.pushViewController(UIViewController, animated: true)})
+ } */
     
     //  データが入った状態でプロパティ追加すると、migrationされる仕様
     let realm = try! Realm(configuration: Realm.Configuration(deleteRealmIfMigrationNeeded: true))
@@ -38,14 +41,18 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         tableView.tableHeaderView = searchController.searchBar
     }
     
-    //    画面遷移のメソッド
+    //    画面遷移時に送るデータ定義のメソッド
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         let inputViewController: inputViewController = segue.destination as! inputViewController
         //       セルなら詳細画面へ。+は新規作成画面へ。
         if segue.identifier == "cellSegue" {
             let indexPath = self.tableView.indexPathForSelectedRow
+            if searchController.isActive{
+                inputViewController.task = filteredCategory[indexPath!.row]
+            }else{
             inputViewController.task = taskArray[indexPath!.row]
+            }
         } else {
             let task = Task()
             task.date = Date()
@@ -75,6 +82,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         let task = taskArray[indexPath.row]
         let filteredTask = filteredCategory[indexPath.row]
+        
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
         
@@ -94,6 +102,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         performSegue(withIdentifier: "cellSegue", sender: nil)
         searchController.isActive = false
     }
+    
+    
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle{
         return .delete
@@ -127,7 +137,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func updateSearchResults(for searchController: UISearchController) {
         //    searchBarに打ち込まれた文字を変数として定義し、それで検索をかける
         let searchCategory = searchController.searchBar.text!
-        filteredCategory = try! Realm().objects(Task.self).filter("category CONTAINS %@", searchCategory)
+        filteredCategory = try! Realm().objects(Task.self).filter("category == %@", searchCategory)
         
         self.tableView.reloadData()
     }
