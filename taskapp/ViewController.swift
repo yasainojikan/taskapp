@@ -10,17 +10,14 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate {
     
     @IBOutlet weak var tableView: UITableView!
-   /* @IBAction func Add(_ sender: Any) {
-        self.searchController.dismiss(animated: true, completion: {self.navigationController?.pushViewController(UIViewController, animated: true)})
- } */
-    
+
     //  データが入った状態でプロパティ追加すると、migrationされる仕様
-    let realm = try! Realm(configuration: Realm.Configuration(deleteRealmIfMigrationNeeded: true))
+    let realm = try! Realm(configuration:Realm.Configuration(deleteRealmIfMigrationNeeded: true))
     
-    var searchController = UISearchController()
+    var searchBar = UISearchBar()
     var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: false)
     var filteredCategory = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
     
@@ -32,13 +29,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         tableView.delegate = self
         tableView.dataSource = self
         
-        searchController = UISearchController(searchResultsController: nil)
-        searchController.searchResultsUpdater = self
-        searchController.searchBar.sizeToFit()
-        searchController.dimsBackgroundDuringPresentation = false
-        searchController.hidesNavigationBarDuringPresentation = false
+        searchBar = UISearchBar()
+        searchBar.delegate = self
+        searchBar.sizeToFit()
+        searchBar.searchBarStyle = UISearchBar.Style.default
+        searchBar.showsSearchResultsButton = false
+        searchBar.placeholder = "カテゴリ検索"
+        searchBar.setValue("キャンセル", forKey: "_cancelButtonText")
+        searchBar.tintColor = UIColor.red
         
-        tableView.tableHeaderView = searchController.searchBar
+        tableView.tableHeaderView = searchBar
     }
     
     //    画面遷移時に送るデータ定義のメソッド
@@ -48,10 +48,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         //       セルなら詳細画面へ。+は新規作成画面へ。
         if segue.identifier == "cellSegue" {
             let indexPath = self.tableView.indexPathForSelectedRow
-            if searchController.isActive{
+            if searchBar.text != "" {
                 inputViewController.task = filteredCategory[indexPath!.row]
             }else{
-            inputViewController.task = taskArray[indexPath!.row]
+                inputViewController.task = taskArray[indexPath!.row]
             }
         } else {
             let task = Task()
@@ -70,14 +70,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         tableView.reloadData()
     }
     
+    //    セルの個数を定義
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if searchController.isActive {
+        if searchBar.text != "" {
             return filteredCategory.count
         }else {
             return taskArray.count
         }
     }
     
+    //    セルの内容を定義
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         let task = taskArray[indexPath.row]
@@ -89,7 +91,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let dateString: String = formatter.string(from: task.date)
         cell.detailTextLabel?.text = dateString
         
-        if searchController.isActive {
+        if searchBar.text != "" {
             // もしサーチコントローラーが動いているなら、検索Taskを並べる
             cell.textLabel?.text = filteredTask.title
         } else {
@@ -100,10 +102,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "cellSegue", sender: nil)
-        searchController.isActive = false
     }
-    
-    
     
     func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle{
         return .delete
@@ -133,12 +132,32 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    //    文字が入力されるたびに呼ばれる
-    func updateSearchResults(for searchController: UISearchController) {
+    //    検索ボタンが押された時に呼ばれる
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        self.view.endEditing(true)
+        searchBar.showsCancelButton = true
+        
         //    searchBarに打ち込まれた文字を変数として定義し、それで検索をかける
-        let searchCategory = searchController.searchBar.text!
+        let searchCategory = searchBar.text!
         filteredCategory = try! Realm().objects(Task.self).filter("category == %@", searchCategory)
         
         self.tableView.reloadData()
+    }
+    
+    //    キャンセルボタンが押された時に呼ばれる
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.showsCancelButton = false
+        self.view.endEditing(true)
+        searchBar.text = ""
+        
+        //        検索ボタンが押されているので、filteredCategoryを初期化する
+        filteredCategory = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: false)
+        self.tableView.reloadData()
+    }
+    
+    //    テキストフィールド入力開始前に呼ばれる
+    func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
+        searchBar.showsCancelButton = true
+        return true
     }
 }
